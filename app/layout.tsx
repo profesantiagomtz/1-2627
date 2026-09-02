@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'EDOA · Grupo 311',
   description: 'Plataforma de aprendizaje y acompañamiento para el grupo 311 en Elaboración de documentos digitales avanzados.',
-  metadataBase: new URL('https://edoa-grupo-311.blackaries90.chatgpt.site'),
+  metadataBase: new URL('https://profesantiagomtz.github.io/1-2627/'),
   openGraph: {
     title: 'EDOA · Grupo 311',
     description: 'Aprende, entrega y avanza en Elaboración de documentos digitales avanzados.',
