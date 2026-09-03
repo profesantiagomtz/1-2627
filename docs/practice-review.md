@@ -1,5 +1,10 @@
 # Revisión didáctica: estudiantes sin experiencia
 
+## Notas «¿Sabías que…?» — revisión previa
+
+1. Exactitud: contrastados documentos recientes y plantillas con «Tareas básicas en Word»; contador con «Mostrar recuento de palabras»; zoom con «Acercar o alejar un documento», todos de Microsoft. Fuentes junto a cada nota. No se incorpora el supuesto límite de 1,000 páginas.
+2. Claridad y correspondencia: cuatro notas breves con ejemplos, ligadas a las tres lecciones. Solo se muestran en lectura, no en práctica ni reto. Se distinguen de instrucciones y calificaciones, y advierten que describen Word real, no funciones nuevas del simulador.
+
 Alcance: las tres lecciones disponibles y las rutas libres del escritorio. No incluye lecciones en preparación.
 
 ## Primera revisión previa: comprensión

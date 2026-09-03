@@ -3,6 +3,21 @@ import assert from 'node:assert/strict';
 import { lessons, scoreResponses, summarize } from '../lib/word-lessons.ts';
 import { practiceGuidance } from '../lib/practice-guidance.ts';
 import { beginnerSteps, lessonPreparation } from '../lib/beginner-guidance.ts';
+import { factsForLesson, wordFacts } from '../lib/word-facts.ts';
+
+test('las notas tienen ejemplos, fuentes oficiales y correspondencia con las lecciones', () => {
+  assert.equal(new Set(wordFacts.map(fact => fact.id)).size, wordFacts.length);
+  for (const fact of wordFacts) {
+    assert.ok(lessons.some(lesson => lesson.id === fact.lessonId));
+    assert.ok(fact.fact.length && fact.example.length && fact.sourceTitle.length);
+    assert.equal(new URL(fact.sourceUrl).hostname, 'support.microsoft.com');
+  }
+  for (const lesson of lessons) assert.ok(factsForLesson(lesson.id, 'read').length);
+});
+test('las notas no interrumpen las prácticas ni revelan información durante el reto', () => {
+  for (const phase of ['guided', 'ready', 'challenge', 'result']) for (const lesson of lessons) assert.deepEqual(factsForLesson(lesson.id, phase), []);
+  assert.deepEqual(factsForLesson('unknown', 'read'), []);
+});
 
 test('todas las lecciones explican el contexto y cada acción tiene ubicación, pasos y resultado', () => {
   for (const lesson of lessons) {
