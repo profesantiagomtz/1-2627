@@ -40,7 +40,7 @@ export default function AccountAccess({ session }: { session: Session | null }) 
     if (busy) return;
     const address = email.trim().toLowerCase();
     if (mode !== 'password' && !/^[^\s@]+@tam\.conalep\.edu\.mx$/.test(address)) {
-      setMessage('Utiliza tu correo institucional @tam.conalep.edu.mx.');
+      setMessage('Utiliza el correo autorizado para tu grupo. Consulta al profesor si necesitas ayuda.');
       return;
     }
     if ((mode === 'register' || mode === 'password') && (password.length < 8 || password !== confirmation)) {
@@ -80,13 +80,13 @@ export default function AccountAccess({ session }: { session: Session | null }) 
     }
   }
 
-  if (session && mode !== 'password') return <section className="access-card" id="acceso"><div><h2>Tu cuenta institucional</h2><p>Si antes ingresabas mediante enlace, establece ahora tu contraseña.</p></div><button className="profile" onClick={() => changeMode('password')}>Establecer o cambiar contraseña</button></section>;
+  if (session && mode !== 'password') return <section className="access-card" id="acceso"><div><h2>Tu cuenta del aula</h2><p>Administra tu contraseña sin crear otra cuenta.</p></div><button className="profile" onClick={() => changeMode('password')}>Establecer o cambiar contraseña</button></section>;
 
   return <section className="access-card" id="acceso">
-    <div><p className="eyebrow light">ACCESO INSTITUCIONAL</p><h2>{mode === 'login' ? 'Inicia sesión' : mode === 'register' ? 'Crea tu cuenta' : mode === 'recover' ? 'Recupera tu acceso' : 'Establece tu contraseña'}</h2><p>{mode === 'register' ? 'Confirma tu correo una sola vez. Después entra con tu contraseña.' : mode === 'recover' ? 'También sirve si tu cuenta todavía no tiene contraseña.' : 'Utiliza tu correo CONALEP y una contraseña personal. No la compartas.'}</p></div>
+    <div><p className="eyebrow light">TU ESPACIO DE APRENDIZAJE</p><h2>{mode === 'login' ? 'Inicia sesión' : mode === 'register' ? 'Crea tu cuenta' : mode === 'recover' ? 'Recupera tu acceso' : 'Establece tu contraseña'}</h2><p>{mode === 'register' ? 'Confirma tu correo una sola vez. Después entra con tu contraseña.' : mode === 'recover' ? 'También sirve si tu cuenta todavía no tiene contraseña.' : 'Utiliza tu correo autorizado y una contraseña personal. No la compartas.'}</p></div>
     <form className="password-form" onSubmit={submit}>
       <fieldset disabled={busy}>
-        {mode !== 'password' && <><label htmlFor="account-email">Correo institucional</label><input id="account-email" type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} /></>}
+        {mode !== 'password' && <><label htmlFor="account-email">Correo electrónico</label><input id="account-email" type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} /></>}
         {mode !== 'recover' && <><label htmlFor="account-password">{mode === 'login' ? 'Contraseña' : 'Nueva contraseña (mínimo 8 caracteres)'}</label><input id="account-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required minLength={mode === 'login' ? 1 : 8} value={password} onChange={e => setPassword(e.target.value)} /></>}
         {(mode === 'register' || mode === 'password') && <><label htmlFor="account-confirm">Repite la contraseña</label><input id="account-confirm" type="password" autoComplete="new-password" required minLength={8} value={confirmation} onChange={e => setConfirmation(e.target.value)} /></>}
         <button type="submit">{busy ? 'Procesando…' : mode === 'login' ? 'Iniciar sesión' : mode === 'register' ? 'Registrarme' : mode === 'recover' ? 'Enviar recuperación' : 'Guardar contraseña'}</button>

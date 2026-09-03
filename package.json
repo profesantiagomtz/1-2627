@@ -6,9 +6,11 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "vinext dev",
+    "dev": "vite --config vite.github.config.ts",
     "build": "vite build --config vite.github.config.ts",
-    "start": "wrangler dev --config dist/server/wrangler.json",
+    "start": "vite preview --config vite.github.config.ts",
+    "test": "node --experimental-strip-types --test tests/word-lessons.test.ts",
+    "typecheck": "tsc --project tsconfig.learning.json",
     "lint": "oxlint",
     "format": "oxfmt"
   },

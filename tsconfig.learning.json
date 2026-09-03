@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "allowImportingTsExtensions": true, "incremental": false },
+  "include": ["main.tsx", "app/page.tsx", "components/account-access.tsx", "components/word-lab.tsx", "lib/word-lessons.ts", "lib/supabase.ts", "tests/word-lessons.test.ts"],
+  "exclude": ["node_modules"]
+}

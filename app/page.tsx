@@ -1,83 +1,83 @@
 'use client';
-
-import type { Session } from '@supabase/supabase-js';
 import { useEffect, useMemo, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import AccountAccess from '@/components/account-access';
-
-type Activity = { id: number; code: string; unit: number; title: string; weight: number; sort_order: number };
-
-const units = [
-  { number: '01', title: 'Procesador de texto', hours: 44, color: '#0f766e', outcomes: ['Formato y estilos', 'Inserción de objetos', 'Correspondencia y colaboración'] },
-  { number: '02', title: 'Presentaciones electrónicas', hours: 25, color: '#d97706', outcomes: ['Diseño y plantillas', 'Objetos, animación y transición'] },
-  { number: '03', title: 'Hoja de cálculo', hours: 55, color: '#2563eb', outcomes: ['Formato de libros', 'Fórmulas y funciones', 'Gráficas y macros', 'Tablas dinámicas y protección'] },
-  { number: '04', title: 'Internet y comunicación', hours: 20, color: '#7c3aed', outcomes: ['Navegación segura', 'Configuración de correo', 'Comunicación en línea'] },
-];
-
-const preview: Activity[] = [
-  { id: 1, code: '1.1.1', unit: 1, title: 'Documento con formato establecido', weight: 5, sort_order: 1 },
-  { id: 2, code: '1.2.1', unit: 1, title: 'Documento con tablas, imágenes y referencias', weight: 10, sort_order: 2 },
-  { id: 3, code: '1.3.1', unit: 1, title: 'Combinación de correspondencia y colaboración', weight: 10, sort_order: 3 },
-];
+import WordLab from '@/components/word-lab';
+import { lessons, nextLessons, summarize, type PracticeAttempt } from '@/lib/word-lessons';
 
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
-  const [activities, setActivities] = useState<Activity[]>(preview);
-  const [completed, setCompleted] = useState<number[]>([]);
-  const [activeUnit, setActiveUnit] = useState(0);
-  const [simulator, setSimulator] = useState(false);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [score, setScore] = useState<number | null>(null);
-
+  const [authLoading, setAuthLoading] = useState(true);
+  const [attempts, setAttempts] = useState<PracticeAttempt[]>([]);
+  const [selected, setSelected] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [refresh, setRefresh] = useState(0);
+  const userId = session?.user.id;
+  const stats = useMemo(() => summarize(attempts), [attempts]);
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
+    const { data } = supabase.auth.onAuthStateChange((_event, next) => { setSession(next); setAuthLoading(false); });
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (error) setError('No se pudo restaurar la sesión. Vuelve a iniciar sesión.');
+      setSession(data.session); setAuthLoading(false);
+    }).catch(() => { setError('No se pudo restaurar la sesión. Vuelve a iniciar sesión.'); setAuthLoading(false); });
     return () => data.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!session) { setCompleted([]); setActivities(preview); setSimulator(false); return; }
-    Promise.all([
-      supabase.from('activities').select('id,code,unit,title,weight,sort_order').order('sort_order'),
-      supabase.from('submissions').select('activity_id').in('status', ['submitted', 'graded']),
-    ]).then(([a, s]) => {
-      if (a.data?.length) setActivities(a.data as Activity[]);
-      setCompleted((s.data ?? []).map((item) => item.activity_id));
-    });
-  }, [session]);
+    let cancelled = false;
+    setAttempts([]); setSelected(0); setError('');
+    if (!userId) { setLoading(false); return; }
+    setLoading(true);
+    async function load() {
+      try {
+        const rows: PracticeAttempt[] = [];
+        for (let offset = 0; ; offset += 500) {
+          const { data, error } = await supabase.from('word_practice_attempts').select('id,lesson_id,score,created_at').eq('student_id', userId!).order('created_at', { ascending: false }).order('id').range(offset, offset + 499);
+          if (error) throw error;
+          rows.push(...(data ?? []));
+          if (!data || data.length < 500) break;
+        }
+        if (!cancelled) setAttempts(rows);
+      } catch {
+        if (!cancelled) setError('No se pudo cargar tu historial. No significa que hayas perdido tu avance. Reintenta antes de comenzar un reto.');
+      } finally { if (!cancelled) setLoading(false); }
+    }
+    void load();
+    return () => { cancelled = true; };
+  }, [userId, refresh]);
 
-  const visible = useMemo(() => activities.filter((item) => item.unit === activeUnit + 1), [activities, activeUnit]);
-  const progress = Math.round((completed.length / 12) * 100);
-
-
-  async function finishSimulator() {
-    const key = { orientation: 'vertical', margins: 'normal', header: 'titulo', watermark: 'borrador' };
-    const result = Object.entries(key).filter(([field, value]) => answers[field] === value).length * 25;
-    setScore(result);
-    if (!session || !activities[0]) return;
-    const { data: attempt } = await supabase.from('attempts').insert({ activity_id: activities[0].id, student_id: session.user.id, attempt_number: Date.now() % 30000, answers, score: result, feedback: [result === 100 ? 'Configuración correcta' : 'Revisa las opciones'], completed_at: new Date().toISOString() }).select('id').single();
-    await supabase.from('submissions').upsert({ activity_id: activities[0].id, student_id: session.user.id, best_attempt_id: attempt?.id, status: 'submitted', score: result, submitted_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: 'activity_id,student_id' });
-    setCompleted((current) => current.includes(activities[0].id) ? current : [...current, activities[0].id]);
+  function selectLesson(index: number) {
+    if (index === selected) return;
+    if (!window.confirm('¿Cambiar de lección? Si tienes un reto en curso, guarda su resultado antes de salir.')) return;
+    setSelected(index);
   }
+  async function signOut() {
+    const { error } = await supabase.auth.signOut();
+    if (error) setError('No se pudo cerrar la sesión. Inténtalo de nuevo antes de dejar el equipo.');
+  }
+  function saved(attempt: PracticeAttempt) { setAttempts(current => [attempt, ...current.filter(item => item.id !== attempt.id)]); }
 
-  return <main>
-    <header className="topbar"><a className="brand" href="#inicio"><span className="brand-mark">E</span><span><strong>EDOA</strong><small>Grupo 311</small></span></a><nav><a href="#ruta">Ruta</a><a href="#actividades">Actividades</a><a href="#asesoria">Asesoría</a></nav>{session ? <button className="profile" onClick={() => supabase.auth.signOut()}>Salir</button> : <a className="profile" href="#acceso">Ingresar</a>}</header>
-
-    <section className="dashboard" id="inicio"><div className="welcome"><p className="eyebrow">EDOA · CICLO 2026–2027</p><h1>{session ? 'Tu espacio de trabajo, grupo 311.' : 'Aprende, practica y avanza.'}</h1><p>{session ? session.user.email : 'Plataforma de Elaboración de documentos digitales avanzados.'}</p></div><aside className="course-progress"><div><span>Avance del módulo</span><strong>{progress}%</strong></div><div className="progress-track"><span style={{ width: `${progress}%` }}/></div><small>{completed.length} de 12 evidencias registradas</small></aside></section>
-
-    <AccountAccess session={session} />
-
-    <section className="focus-grid"><article className="focus-card"><div className="focus-copy"><p className="eyebrow light">SIMULADOR DISPONIBLE</p><span className="unit-label">Actividad 1.1.1 · Valor 5%</span><h2>Prepara un documento profesional</h2><p>Practica orientación, márgenes, encabezado y marca de agua antes de trabajar en Word.</p><button className="primary-button" onClick={() => session ? setSimulator(true) : document.getElementById('acceso')?.scrollIntoView()}>Abrir simulador <span>→</span></button></div><div className="document-art" aria-hidden="true"><span className="sheet back"/><span className="sheet front"><i/><i/><i/><b/><i/></span></div></article><aside className="next-card"><p className="eyebrow">CÓMO FUNCIONA</p><div className="date-chip"><strong>01</strong><span>PASO</span></div><h3>Practica y recibe retroalimentación</h3><p>Tu mejor resultado queda guardado.</p><div className="tip"><span>✓</span> Puedes repetir el simulador para mejorar tu dominio.</div></aside></section>
-
-    <section className="section" id="ruta"><div className="section-heading"><div><p className="eyebrow">PROGRAMA EDOA-20</p><h2>Ruta de aprendizaje</h2></div><span>144 horas · 4 unidades</span></div><div className="unit-tabs" role="tablist">{units.map((unit, index) => <button key={unit.number} className={activeUnit === index ? 'active' : ''} onClick={() => setActiveUnit(index)} role="tab" aria-selected={activeUnit === index}><span style={{ background: unit.color }}>{unit.number}</span><div><strong>{unit.title}</strong><small>{unit.hours} horas</small></div></button>)}</div><div className="unit-detail" style={{ '--unit-color': units[activeUnit].color } as React.CSSProperties}><div><p>UNIDAD {units[activeUnit].number}</p><h3>{units[activeUnit].title}</h3><span>{units[activeUnit].hours} horas de aprendizaje</span></div><ol>{units[activeUnit].outcomes.map((outcome, index) => <li key={outcome}><span>{activeUnit + 1}.{index + 1}</span>{outcome}</li>)}</ol></div></section>
-
-    <section className="section evidence-section" id="actividades"><div className="section-heading"><div><p className="eyebrow">UNIDAD {activeUnit + 1}</p><h2>Actividades y evidencias</h2></div><span>{session ? 'Tu avance se guarda automáticamente' : 'Ingresa para trabajar'}</span></div><div className="evidence-list">{visible.map((item) => <article key={item.id} className={completed.includes(item.id) ? 'evidence done' : 'evidence'}><span className="custom-check">✓</span><span className="code">{item.code}</span><span className="evidence-title"><strong>{item.title}</strong><small>{completed.includes(item.id) ? 'Entregada' : item.code === '1.1.1' ? 'Simulador disponible' : 'Próximamente'}</small></span><b>{item.weight}%</b></article>)}</div></section>
-
-    <section className="advisor" id="asesoria"><div><p className="eyebrow light">TU GRUPO, TU ACOMPAÑAMIENTO</p><h2>No caminas solo en este semestre.</h2><p>Además de ser tu profesor de EDOA, soy el asesor del grupo 311. Si algo académico o personal está frenando tu avance, podemos revisarlo a tiempo.</p></div><div className="advisor-actions"><a href="#inicio" className="light-button">Volver al inicio <span>↑</span></a><small>Acércate también al terminar la clase</small></div></section>
-    <footer><strong>EDOA · Grupo 311</strong><span>Elaboración de documentos digitales avanzados</span><small>CONALEP · 2026–2027</small></footer>
-
-    {simulator && <div className="modal-backdrop" onMouseDown={() => setSimulator(false)}><section className="simulator" role="dialog" aria-modal="true" aria-labelledby="sim-title" onMouseDown={(e) => e.stopPropagation()}><button className="close" onClick={() => setSimulator(false)} aria-label="Cerrar">×</button><p className="eyebrow">SIMULADOR 1.1.1</p><h2 id="sim-title">Configura el documento solicitado</h2><p className="instruction">Carta formal vertical, márgenes normales, título del grupo en el encabezado y marca de agua “Borrador”.</p><div className="sim-grid">{[
-      ['orientation','Orientación',[['vertical','Vertical'],['horizontal','Horizontal']]], ['margins','Márgenes',[['normal','Normales'],['estrecho','Estrechos']]], ['header','Encabezado',[['titulo','EDOA · Grupo 311'],['ninguno','Sin encabezado']]], ['watermark','Marca de agua',[['borrador','Borrador'],['confidencial','Confidencial']]],
-    ].map(([field,label,options]) => <fieldset key={field as string}><legend>{label as string}</legend>{(options as string[][]).map(([value,text]) => <label key={value}><input type="radio" name={field as string} checked={answers[field as string] === value} onChange={() => setAnswers({...answers,[field as string]:value})}/><span>{text}</span></label>)}</fieldset>)}</div><button className="submit-sim" onClick={finishSimulator}>Calificar y guardar</button>{score !== null && <div className={score === 100 ? 'result success' : 'result'}><strong>Resultado: {score}/100</strong><span>{score === 100 ? '¡Excelente! La configuración es correcta.' : 'Revisa tus elecciones y vuelve a intentarlo.'}</span></div>}</section></div>}
+  return <main className="learning-app">
+    <header className="studio-header"><a className="studio-brand" href="#aprende"><span>PS</span><div><strong>Aula del Profe Santiago</strong><small>Material didáctico · EDOA</small></div></a><nav aria-label="Navegación principal"><a href="#aprende">Aprender</a><a href="#ruta">Mi ruta</a><a href="#acceso">Mi cuenta</a></nav>{session && <button className="outline-button" onClick={signOut}>Cerrar sesión</button>}</header>
+    <div className="studio-content">
+      <section className="course-heading" id="aprende"><div><p className="lesson-kicker">TALLER DE DOCUMENTOS · GRUPO 311</p><h1>Mis primeros pasos en Word</h1><p>Explora las herramientas. Practica cada paso. Demuestra lo que aprendiste.</p></div><span className="course-badge">BLOQUE 01 · DESDE CERO</span></section>
+      <section className="practice-stats" aria-label="Tus resultados del bloque"><div><span>Avance del bloque</span><strong>{stats.progress}%</strong><progress value={stats.progress} max={100} aria-label="Avance del bloque"/><small>{stats.completed} de {lessons.length} lecciones superadas</small></div><div><span>Calificación de práctica</span><strong>{stats.grade === null ? '—' : stats.grade}<em>/100</em></strong><small>Promedio del mejor resultado de cada lección evaluada</small></div><div><span>Intentos guardados</span><strong>{attempts.length}</strong><small>Repite para mejorar. Tu mejor nota se conserva.</small></div></section>
+      {authLoading && <p role="status" className="notice-strip">Comprobando tu sesión…</p>}
+      {!session && !authLoading && <p className="notice-strip">Puedes explorar la primera práctica guiada. <a href="#acceso">Inicia sesión</a> para evaluar, guardar y continuar tu ruta.</p>}
+      {loading && <p role="status" className="notice-strip">Recuperando tus resultados…</p>}
+      {error && <div role="alert" className="notice-strip warning">{error} <button className="text-button" onClick={() => setRefresh(value => value + 1)}>Reintentar</button></div>}
+      <div className="course-grid"><aside className="lesson-sidebar" aria-label="Lecciones"><p className="lesson-kicker">TU RUTA, PASO A PASO</p><ol>{lessons.map((lesson, index) => {
+        const locked = index > 0 && (stats.best[lessons[index - 1].id] ?? -1) < 70;
+        return <li key={lesson.id}><button className={selected === index ? 'selected' : ''} disabled={locked || loading} aria-current={selected === index ? 'step' : undefined} onClick={() => selectLesson(index)}><span className="lesson-number">{(stats.best[lesson.id] ?? -1) >= 70 ? '✓' : `0${index + 1}`}</span><span><strong>{lesson.title}</strong><small>{locked ? 'Supera la anterior con 70/100' : stats.best[lesson.id] !== undefined ? `Mejor resultado: ${stats.best[lesson.id]}/100` : `${lesson.minutes} min · Aprende + practica`}</small></span></button></li>;
+      })}</ol><div className="sidebar-note"><strong>¿Cómo avanzo?</strong><p>Completa el reto con 70/100 y guarda el resultado. Se abrirá la siguiente lección.</p><p>La práctica guiada no afecta tu nota.</p></div></aside>
+      <WordLab key={`${userId ?? 'guest'}-${selected}`} lesson={lessons[selected]} userId={!loading && !error ? userId : undefined} onSaved={saved}/></div>
+      <section className="learning-history"><div className="section-title"><div><p className="lesson-kicker">APRENDER TAMBIÉN ES INTENTAR</p><h2>Mi historial de práctica</h2></div><span>Últimos 10 intentos</span></div>{attempts.length ? <div className="history-table"><table><thead><tr><th>Lección</th><th>Resultado</th><th>Fecha</th></tr></thead><tbody>{attempts.slice(0,10).map(attempt => <tr key={attempt.id}><td>{lessons.find(lesson => lesson.id === attempt.lesson_id)?.title ?? attempt.lesson_id}</td><td><span className={attempt.score >= 70 ? 'score-chip passed' : 'score-chip'}>{attempt.score}/100</span></td><td>{new Date(attempt.created_at).toLocaleString('es-MX', { dateStyle:'medium', timeStyle:'short' })}</td></tr>)}</tbody></table></div> : <p className="empty-history">{session ? 'Cuando guardes tu primer reto aparecerá aquí. Las lecturas y las prácticas guiadas no suman puntos.' : 'Tu historial estará disponible al iniciar sesión.'}</p>}</section>
+      <section className="next-route" id="ruta"><p className="lesson-kicker">LO QUE SIGUE EN TU APRENDIZAJE</p><h2>De tus primeras palabras a un documento completo</h2><p>Estas lecciones se incorporarán después. Tu avance actual corresponde únicamente a las tres lecciones del bloque inicial.</p><ol>{nextLessons.map((title,index) => <li key={title}><span>{String(index+4).padStart(2,'0')}</span><strong>{title}</strong><small>En preparación</small></li>)}</ol><details><summary>Ver la ruta completa del módulo EDOA</summary><ul><li>Procesador de texto · 44 horas</li><li>Presentaciones electrónicas · 25 horas</li><li>Hoja de cálculo · 55 horas</li><li>Internet y comunicación · 20 horas</li></ul><p>Las prácticas son preparación para las evidencias. Sus porcentajes no se suman automáticamente a una calificación oficial.</p></details></section>
+      <AccountAccess session={session}/>
+      <section className="mentor-note"><h2>Tu aprendizaje tiene acompañamiento.</h2><p>Si una actividad se te dificulta, revisa la explicación y vuelve a practicar. También puedes acercarte al Profe Santiago durante la clase o asesoría del grupo 311.</p></section>
+      <footer className="studio-footer"><strong>Aula del Profe Santiago</strong><span>EDOA · Material didáctico personal · 2026–2027</span><small>Simulación educativa independiente. Word es una marca de Microsoft; no existe afiliación con Microsoft.</small></footer>
+    </div>
   </main>;
 }
