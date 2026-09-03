@@ -14,7 +14,7 @@ export default function WindowsRun({ onOpenWord, onClose }: { onOpenWord: () => 
       if (isWordRunCommand(command)) onOpenWord();
       else { setError('No se encontró el programa. Para abrir Word, escribe WINWORD y vuelve a pulsar Aceptar.'); input.current?.focus(); }
     }}>
-      <p id={`${id}-description`}>Escribe el nombre del programa que deseas abrir.</p>
+      <p id={`${id}-description`}>Haz clic en el cuadro blanco de Abrir. Escribe WINWORD, sin comillas. Después pulsa Aceptar o la tecla Enter. Si necesitas salir sin abrir Word, pulsa Cancelar.</p>
       <label htmlFor={`${id}-command`}>Abrir:</label>
       <input id={`${id}-command`} ref={input} value={command} onChange={event => { setCommand(event.target.value); setError(''); }} autoComplete="off" spellCheck={false} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}/>
       {error && <p id={`${id}-error`} className="win-run-error" role="alert">{error}</p>}

@@ -2,6 +2,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { lessons, scoreResponses, summarize } from '../lib/word-lessons.ts';
 import { practiceGuidance } from '../lib/practice-guidance.ts';
+import { beginnerSteps, lessonPreparation } from '../lib/beginner-guidance.ts';
+
+test('todas las lecciones explican el contexto y cada acción tiene ubicación, pasos y resultado', () => {
+  for (const lesson of lessons) {
+    assert.ok(lessonPreparation[lesson.id].length > 100);
+    for (const step of lesson.steps) {
+      const guide = beginnerSteps[step.target];
+      assert.ok(guide.where.length > 30, step.target);
+      assert.ok(guide.actions.length >= 2, step.target);
+      assert.match(guide.expected, /[Pp]ulsa/, step.target);
+    }
+  }
+});
 import { isWordRunCommand, wordLaunchLabels } from '../lib/word-launch.ts';
 
 test('Ejecutar reconoce WINWORD sin importar mayúsculas y espacios exteriores', () => {

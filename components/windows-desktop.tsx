@@ -10,7 +10,7 @@ export default function WindowsDesktop({ step, guided = false, correct = false, 
   const [runOpen, setRunOpen] = useState(false);
   const runButton = useRef<HTMLButtonElement>(null);
   const shortcutOpen = launchRoute !== null;
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(step === 2 ? 'Word' : '');
   const [notice, setNotice] = useState('');
   const [dismissed, setDismissed] = useState(false);
   const free = step === undefined;
@@ -22,7 +22,7 @@ export default function WindowsDesktop({ step, guided = false, correct = false, 
   function closeRun() { setRunOpen(false); runButton.current?.focus(); }
   const focusClass = (target: number) => guided && !correct && step === target ? ' win-target' : '';
   return <div className="windows-practice">
-    {free && <div className="desktop-instruction"><strong>Prueba tres formas de abrir Word:</strong><ol><li>Escritorio: doble clic en el acceso directo.</li><li>Ejecutar: abre el cuadro, escribe <b>WINWORD</b> y pulsa Aceptar o Enter.</li><li>Barra de tareas: un clic en el icono de Word anclado abajo.</li></ol><p>Con teclado puedes seleccionar los iconos y pulsar Enter. En pantalla táctil, selecciona el acceso directo y usa Abrir.</p></div>}
+    {free && <div className="desktop-instruction"><strong>Prueba tres formas de abrir Word:</strong><ol><li>Escritorio: busca el icono azul con W y el nombre Word, debajo de la Papelera. Haz doble clic. Se abrirá la ventana de Word. Pulsa Volver al escritorio para probar otra ruta.</li><li>Ejecutar: pulsa Abrir Ejecutar, justo encima del escritorio. En la ventana que aparece, haz clic en el cuadro blanco junto a Abrir, escribe <b>WINWORD</b> sin comillas ni espacios entre letras y pulsa Aceptar o la tecla Enter. Verás Word abierto. Pulsa Volver al escritorio.</li><li>Barra de tareas: busca la franja horizontal al pie del escritorio. El icono azul con W está a la derecha del recuadro Buscar. Haz un solo clic en la W: se abrirá Word. Pulsa Volver al escritorio.</li></ol><p>Estas tres rutas son una exploración sin nota. Cuando termines, pulsa Comenzar práctica guiada debajo del escritorio para aprender la cuarta ruta: Inicio y búsqueda.</p><p>Con teclado puedes seleccionar los iconos y pulsar Enter. En pantalla táctil, selecciona el acceso directo y usa Abrir.</p></div>}
     <div className="win-launch-controls"><button ref={runButton} className="outline-button" onClick={openRun}>Abrir Ejecutar <kbd>Win + R</kbd></button><small>Usa este botón para simular el atajo: las teclas físicas pueden abrir Ejecutar en tu equipo.</small></div>
     <div className="windows-desktop" aria-label="Escritorio simulado de Windows 11">
       <div className="win-icons">
@@ -35,7 +35,7 @@ export default function WindowsDesktop({ step, guided = false, correct = false, 
       {runOpen && <WindowsRun onOpenWord={() => launch('run')} onClose={closeRun}/>}
       {menu && <div className="win-start-menu">
         <form onSubmit={event => { event.preventDefault(); if (step === 1 && !correct) onChoose?.(search.trim().toLowerCase() === 'word' ? 'search-word' : 'search-other'); }}>
-          <label htmlFor="windows-search">Buscar aplicaciones</label><div className={`win-search${focusClass(1)}`}><input id="windows-search" value={search} disabled={step !== 1 || correct} onChange={event => setSearch(event.target.value)} placeholder={guided ? 'Escribe Word' : 'Escribe para buscar'}/><button disabled={step !== 1 || correct} aria-label="Buscar"><PracticeIcon name="search-word"/></button></div>
+          <label htmlFor="windows-search">Buscar aplicaciones</label><div className={`win-search${focusClass(1)}`}><input id="windows-search" value={search} disabled={step !== 1 || correct} onChange={event => setSearch(event.target.value)} placeholder={guided ? 'Escribe Word' : 'Escribe para buscar'}/><button disabled={step !== 1 || correct} aria-label="Buscar"><PracticeIcon name="search-word"/><span>Buscar</span></button></div>
         </form>
         <p>{step === 2 ? 'Mejor coincidencia' : 'Anclado'}</p>
         <button className={`win-search-result${focusClass(2)}`} disabled={correct || step !== 2} onClick={() => onChoose?.('word')}><img src={wordIcon} alt=""/><span><strong>Word</strong><small>Aplicación</small></span></button>
@@ -44,7 +44,7 @@ export default function WindowsDesktop({ step, guided = false, correct = false, 
       </div>}
       {opened && <div className="win-app-window" aria-label="Word abierto en el simulador">
         <div className="win-app-title"><img src={wordIcon} alt=""/><span>Word</span><button aria-label="Cerrar Word simulado" onClick={() => { setLaunchRoute(null); setSelected(false); setDismissed(true); if (step === 2 && correct) setNotice('Completaste la apertura. Pulsa Terminar debajo del escritorio.'); }}>×</button></div>
-        <div className="win-app-body"><aside>Word<br/><small>Inicio<br/>Nuevo<br/>Abrir</small></aside><div><h3>Buenas tardes</h3><p>Nuevo</p><div className="win-blank-paper" aria-hidden="true"></div><strong>Documento en blanco</strong><p className="win-open-success">✓ Has abierto Word{launchRoute ? ` ${wordLaunchLabels[launchRoute]}` : ''}.</p><p>Esta es una vista de práctica. Aprenderás a crear documentos en la siguiente lección.</p>{shortcutOpen && <button className="solid-button" onClick={() => { setLaunchRoute(null); setSelected(false); }}>Volver al escritorio</button>}</div></div>
+        <div className="win-app-body"><aside>Word<br/><small>Inicio<br/>Nuevo<br/>Abrir</small></aside><div><h3>Buenas tardes</h3><p>Nuevo</p><div className="win-blank-paper" aria-hidden="true"></div><strong>Documento en blanco</strong><p className="win-open-success">✓ Has abierto Word{launchRoute ? ` ${wordLaunchLabels[launchRoute]}` : ''}.</p><p>Esta ventana confirma que abriste Word. Documento en blanco todavía no es un botón en esta vista: aprenderás a elegirlo en la siguiente lección.</p>{shortcutOpen && <button className="solid-button" onClick={() => { setLaunchRoute(null); setSelected(false); }}>Volver al escritorio</button>}</div></div>
       </div>}
       <div className="win-taskbar">
         <button className={`win-start-button${focusClass(0)}`} aria-label="Inicio" title="Inicio" disabled={!free && correct} onClick={() => { if (free) setNotice('Para practicar Inicio y búsqueda, pulsa Comenzar práctica guiada debajo del escritorio.'); else onChoose?.('start'); }}><PracticeIcon name="start"/></button>
