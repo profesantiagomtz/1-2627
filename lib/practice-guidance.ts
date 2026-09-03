@@ -1,0 +1,15 @@
+export const practiceGuidance: Record<string, { label: string; instruction: string }> = {
+  start: { label: 'Inicio', instruction: 'Haz clic en Inicio, abajo a la izquierda.' },
+  'search-word': { label: 'Buscar Word', instruction: 'Escribe Word en el cuadro y haz clic en Buscar.' },
+  word: { label: 'Abrir Word', instruction: 'Haz clic en la aplicación Word, identificada con la W.' },
+  blank: { label: 'Documento en blanco', instruction: 'Haz clic en Documento en blanco para empezar desde cero.' },
+  template: { label: 'Elegir una plantilla', instruction: 'Haz clic en Carta sencilla para usar una plantilla.' },
+  open: { label: 'Abrir un archivo', instruction: 'Haz clic en Abrir, en el menú azul de la izquierda.' },
+  'file-practica': { label: 'Mi práctica.docx', instruction: 'Haz clic en el archivo Mi práctica.docx.' },
+  title: { label: 'Barra de título', instruction: 'Haz clic en la barra azul con el nombre del documento.' },
+  tabs: { label: 'Pestañas', instruction: 'Haz clic en la fila Inicio, Insertar, Diseño…' },
+  ribbon: { label: 'Cinta de opciones', instruction: 'Haz clic en el grupo de herramientas debajo de las pestañas.' },
+  page: { label: 'Área del documento', instruction: 'Haz clic en la página blanca donde se escribe.' },
+  status: { label: 'Barra de estado', instruction: 'Haz clic en el contador de páginas y palabras, abajo a la izquierda.' },
+  zoom: { label: 'Zoom', instruction: 'Haz clic en el control 100 %, abajo a la derecha.' },
+};

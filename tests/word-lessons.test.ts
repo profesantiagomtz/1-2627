@@ -1,6 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { lessons, scoreResponses, summarize } from '../lib/word-lessons.ts';
+import { practiceGuidance } from '../lib/practice-guidance.ts';
+
+test('cada paso tiene una indicación visual explícita sin cambiar su respuesta', () => {
+  for (const lesson of lessons) for (const step of lesson.steps) {
+    assert.ok(practiceGuidance[step.target]?.label);
+    assert.match(practiceGuidance[step.target].instruction, /clic/);
+  }
+});
 
 test('cada lección asigna 100 puntos a las acciones correctas', () => {
   for (const lesson of lessons) assert.equal(scoreResponses(lesson, lesson.steps.map(step => step.target)), 100);
