@@ -3,6 +3,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import AccountAccess from '@/components/account-access';
 
 type Activity = { id: number; code: string; unit: number; title: string; weight: number; sort_order: number };
 
@@ -21,8 +22,6 @@ const preview: Activity[] = [
 
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
   const [activities, setActivities] = useState<Activity[]>(preview);
   const [completed, setCompleted] = useState<number[]>([]);
   const [activeUnit, setActiveUnit] = useState(0);
@@ -37,7 +36,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session) { setCompleted([]); setActivities(preview); setSimulator(false); return; }
     Promise.all([
       supabase.from('activities').select('id,code,unit,title,weight,sort_order').order('sort_order'),
       supabase.from('submissions').select('activity_id').in('status', ['submitted', 'graded']),
@@ -50,14 +49,6 @@ export default function Home() {
   const visible = useMemo(() => activities.filter((item) => item.unit === activeUnit + 1), [activities, activeUnit]);
   const progress = Math.round((completed.length / 12) * 100);
 
-  async function requestAccess(event: React.FormEvent) {
-    event.preventDefault();
-    const address = email.trim().toLowerCase();
-    if (!address.endsWith('@tam.conalep.edu.mx')) return setMessage('Utiliza tu correo institucional @tam.conalep.edu.mx.');
-    setMessage('Enviando enlace seguro…');
-    const { error } = await supabase.auth.signInWithOtp({ email: address, options: { emailRedirectTo: window.location.href.split('#')[0] } });
-    setMessage(error ? `No fue posible enviarlo: ${error.message}` : 'Revisa tu correo. Te enviamos un enlace para entrar.');
-  }
 
   async function finishSimulator() {
     const key = { orientation: 'vertical', margins: 'normal', header: 'titulo', watermark: 'borrador' };
@@ -74,7 +65,7 @@ export default function Home() {
 
     <section className="dashboard" id="inicio"><div className="welcome"><p className="eyebrow">EDOA · CICLO 2026–2027</p><h1>{session ? 'Tu espacio de trabajo, grupo 311.' : 'Aprende, practica y avanza.'}</h1><p>{session ? session.user.email : 'Plataforma de Elaboración de documentos digitales avanzados.'}</p></div><aside className="course-progress"><div><span>Avance del módulo</span><strong>{progress}%</strong></div><div className="progress-track"><span style={{ width: `${progress}%` }}/></div><small>{completed.length} de 12 evidencias registradas</small></aside></section>
 
-    {!session && <section className="access-card" id="acceso"><div><p className="eyebrow light">ACCESO INSTITUCIONAL</p><h2>Ingresa con tu correo CONALEP</h2><p>Recibirás un enlace seguro. No necesitas crear otra contraseña.</p></div><form onSubmit={requestAccess}><label htmlFor="email">Correo institucional</label><div><input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="alumno@tam.conalep.edu.mx" required/><button>Enviar enlace</button></div>{message && <small>{message}</small>}</form></section>}
+    <AccountAccess session={session} />
 
     <section className="focus-grid"><article className="focus-card"><div className="focus-copy"><p className="eyebrow light">SIMULADOR DISPONIBLE</p><span className="unit-label">Actividad 1.1.1 · Valor 5%</span><h2>Prepara un documento profesional</h2><p>Practica orientación, márgenes, encabezado y marca de agua antes de trabajar en Word.</p><button className="primary-button" onClick={() => session ? setSimulator(true) : document.getElementById('acceso')?.scrollIntoView()}>Abrir simulador <span>→</span></button></div><div className="document-art" aria-hidden="true"><span className="sheet back"/><span className="sheet front"><i/><i/><i/><b/><i/></span></div></article><aside className="next-card"><p className="eyebrow">CÓMO FUNCIONA</p><div className="date-chip"><strong>01</strong><span>PASO</span></div><h3>Practica y recibe retroalimentación</h3><p>Tu mejor resultado queda guardado.</p><div className="tip"><span>✓</span> Puedes repetir el simulador para mejorar tu dominio.</div></aside></section>
 
