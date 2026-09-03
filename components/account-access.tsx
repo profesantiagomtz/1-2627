@@ -43,8 +43,8 @@ export default function AccountAccess({ session }: { session: Session | null }) 
       setMessage('Utiliza tu correo institucional @tam.conalep.edu.mx.');
       return;
     }
-    if ((mode === 'register' || mode === 'password') && (password.length < 12 || password !== confirmation)) {
-      setMessage('Usa al menos 12 caracteres y repite la misma contraseña.');
+    if ((mode === 'register' || mode === 'password') && (password.length < 8 || password !== confirmation)) {
+      setMessage('Usa al menos 8 caracteres y repite la misma contraseña.');
       return;
     }
     setBusy(true);
@@ -87,8 +87,8 @@ export default function AccountAccess({ session }: { session: Session | null }) 
     <form className="password-form" onSubmit={submit}>
       <fieldset disabled={busy}>
         {mode !== 'password' && <><label htmlFor="account-email">Correo institucional</label><input id="account-email" type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} /></>}
-        {mode !== 'recover' && <><label htmlFor="account-password">{mode === 'login' ? 'Contraseña' : 'Nueva contraseña (mínimo 12 caracteres)'}</label><input id="account-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required minLength={mode === 'login' ? 1 : 12} value={password} onChange={e => setPassword(e.target.value)} /></>}
-        {(mode === 'register' || mode === 'password') && <><label htmlFor="account-confirm">Repite la contraseña</label><input id="account-confirm" type="password" autoComplete="new-password" required minLength={12} value={confirmation} onChange={e => setConfirmation(e.target.value)} /></>}
+        {mode !== 'recover' && <><label htmlFor="account-password">{mode === 'login' ? 'Contraseña' : 'Nueva contraseña (mínimo 8 caracteres)'}</label><input id="account-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required minLength={mode === 'login' ? 1 : 8} value={password} onChange={e => setPassword(e.target.value)} /></>}
+        {(mode === 'register' || mode === 'password') && <><label htmlFor="account-confirm">Repite la contraseña</label><input id="account-confirm" type="password" autoComplete="new-password" required minLength={8} value={confirmation} onChange={e => setConfirmation(e.target.value)} /></>}
         <button type="submit">{busy ? 'Procesando…' : mode === 'login' ? 'Iniciar sesión' : mode === 'register' ? 'Registrarme' : mode === 'recover' ? 'Enviar recuperación' : 'Guardar contraseña'}</button>
       </fieldset>
       {message && <p role="status" aria-live="polite">{message}</p>}
