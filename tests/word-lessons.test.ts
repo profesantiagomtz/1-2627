@@ -2,6 +2,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { lessons, scoreResponses, summarize } from '../lib/word-lessons.ts';
 import { practiceGuidance } from '../lib/practice-guidance.ts';
+import { isWordRunCommand, wordLaunchLabels } from '../lib/word-launch.ts';
+
+test('Ejecutar reconoce WINWORD sin importar mayúsculas y espacios exteriores', () => {
+  for (const command of ['WINWORD', 'winword', ' WinWord ', 'WINWORD.EXE']) assert.equal(isWordRunCommand(command), true);
+});
+test('Ejecutar rechaza comandos vacíos, incorrectos y órdenes adicionales', () => {
+  for (const command of ['', ' ', 'word', 'excel', 'WIN WORD', 'WINWORD & calc', 'winword.exe /q']) assert.equal(isWordRunCommand(command), false);
+});
+test('las tres rutas alternativas identifican cómo se abrió Word', () => {
+  assert.match(wordLaunchLabels.run, /WINWORD/);
+  assert.match(wordLaunchLabels.taskbar, /barra de tareas/);
+  assert.match(wordLaunchLabels.shortcut, /escritorio/);
+});
 
 test('cada paso tiene una indicación visual explícita sin cambiar su respuesta', () => {
   for (const lesson of lessons) for (const step of lesson.steps) {
