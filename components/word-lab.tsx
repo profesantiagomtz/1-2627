@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { scoreResponses, type Lesson, type PracticeAttempt } from '@/lib/word-lessons';
 import PracticeIcon from './practice-icon';
+import WindowsDesktop from './windows-desktop';
 import { practiceGuidance } from '@/lib/practice-guidance';
 
 type Phase = 'read' | 'guided' | 'ready' | 'challenge' | 'result';
@@ -11,7 +12,6 @@ export default function WordLab({ lesson, userId, onSaved }: { lesson: Lesson; u
   const [responses, setResponses] = useState<string[]>([]);
   const [correct, setCorrect] = useState(false);
   const [feedback, setFeedback] = useState('');
-  const [search, setSearch] = useState('');
   const [saveState, setSaveState] = useState<'idle'|'saving'|'saved'|'error'>('idle');
   const [requestId, setRequestId] = useState('');
   const [savedScore, setSavedScore] = useState<number | null>(null);
@@ -29,7 +29,7 @@ export default function WordLab({ lesson, userId, onSaved }: { lesson: Lesson; u
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
   function begin(next: 'guided'|'challenge') {
-    setStep(0); setResponses([]); setCorrect(false); setFeedback(''); setSearch('');
+    setStep(0); setResponses([]); setCorrect(false); setFeedback('');
     setSaveState('idle'); setSavedScore(null); firstChoice.current = null;
     setRequestId(crypto.randomUUID()); setPhase(next);
   }
@@ -74,15 +74,12 @@ export default function WordLab({ lesson, userId, onSaved }: { lesson: Lesson; u
     <h2 ref={heading} tabIndex={-1}>{lesson.title}</h2>
     <ol className="phase-track" aria-label="Etapas de la lección">{['Aprende', 'Practica', 'Demuestra'].map((label, index) => <li key={label} className={(phase === 'read' ? 0 : phase === 'guided' || phase === 'ready' ? 1 : 2) === index ? 'current' : ''}><span>{index + 1}</span>{label}</li>)}</ol>
 
-    {phase === 'read' && <div className="lesson-intro"><p className="lesson-kicker">ANTES DE HACERLO</p><p>{lesson.concept}</p><div className="visual-route" aria-label="Los pasos que vas a practicar">{lesson.steps.map((item, index) => <div key={item.target}><span className="route-icon"><PracticeIcon name={item.target}/></span><small>PASO {index + 1}</small><strong>{practiceGuidance[item.target].label}</strong></div>)}</div><p className="note">Simulación educativa simplificada de Word para Windows. Algunas posiciones cambian según la versión. No necesitas tener Word instalado para esta práctica.</p><button className="solid-button" onClick={() => begin('guided')}>Comenzar práctica guiada →</button></div>}
+    {phase === 'read' && <div className="lesson-intro"><p className="lesson-kicker">ANTES DE HACERLO</p><p>{lesson.concept}</p><div className="visual-route" aria-label="Los pasos que vas a practicar">{lesson.steps.map((item, index) => <div key={item.target}><span className="route-icon"><PracticeIcon name={item.target}/></span><small>PASO {index + 1}</small><strong>{practiceGuidance[item.target].label}</strong></div>)}</div><p className="note">Simulación educativa simplificada de Word para Windows. Algunas posiciones cambian según la versión. No necesitas tener Word instalado para esta práctica.</p>{lesson.id === 'word-start' && <WindowsDesktop/>}<button className="solid-button" onClick={() => begin('guided')}>Comenzar práctica guiada →</button></div>}
 
     {active && <><div className="mission"><PracticeIcon name={guided ? current.target : 'click'}/><div><span>{guided ? 'HAZLO AQUÍ · PRÁCTICA CON AYUDA' : 'AHORA TÚ · SIN SEÑALES DE AYUDA'} · {step + 1}/{lesson.steps.length}</span><h3>{correct ? '¡Bien hecho! Continúa con el botón de abajo.' : guided ? practiceGuidance[current.target].instruction : current.goal}</h3><p>{guided ? 'Usa el simulador de esta página, no el menú de tu computadora. Un clic es suficiente.' : 'Haz clic en la zona que resuelve la indicación. Cuenta tu primera elección.'}</p></div></div>
       <div className="simulation-scroll"><div className="simulation-frame">
         <div className="sim-caption"><span><PracticeIcon name="click"/> SIMULADOR INTERACTIVO</span><span>{guided ? 'Sigue la señal naranja' : 'Selecciona tu respuesta'}</span></div>
-        {lesson.id === 'word-start' && <div className="desktop-sim">
-          <div className="desktop-content">{step === 0 ? <div className="desktop-shortcuts">{action('documents', 'Carpeta Documentos', 'desktop-shortcut')}{action('browser', 'Navegador', 'desktop-shortcut')}<div className="desktop-welcome"><strong>Estás dentro de una computadora simulada</strong><span>Los iconos y botones de este recuadro sí se pueden pulsar.</span></div></div> : <div className="start-menu"><h4>Inicio</h4><form onSubmit={event => { event.preventDefault(); choose(search.trim().toLowerCase() === 'word' ? 'search-word' : 'search-other'); }}><label htmlFor="word-search">Buscar una aplicación</label><div className={`search-row ${guided && !correct && step === 1 ? 'search-guided' : ''}`}><input id="word-search" autoComplete="off" value={search} disabled={correct || step !== 1} onChange={event => setSearch(event.target.value)} placeholder={guided ? 'Escribe Word aquí…' : 'Nombre de la aplicación…'}/><button disabled={correct || step !== 1} className={targetClass('search-word')}>{cue('search-word')}<PracticeIcon name="search-word"/>Buscar</button></div></form>{step === 2 && <div className="search-results"><p>Aplicaciones</p>{action('word', 'Word', 'app-result')}{action('excel', 'Excel', 'app-result')}{action('browser', 'Navegador', 'app-result')}</div>}</div>}</div>
-          <div className="taskbar">{action('start', 'Inicio', 'start-button')}<span>Aplicaciones de escritorio</span>{action('settings','Configuración')}</div>
-        </div>}
+        {lesson.id === 'word-start' && <WindowsDesktop key={`${phase}-${step}`} step={step} guided={guided} correct={correct} onChoose={choose}/>}
         {lesson.id === 'word-create' && <div className="word-start-screen"><div className="word-side"><strong>Word</strong>{action('home','Inicio')}{action('new','Nuevo')}{action('open','Abrir')}</div><div className="word-templates"><h4>{step === 3 ? 'Abrir un archivo' : 'Elige tu punto de partida'}</h4>{step === 3 ? <div className="file-list">{action('file-pdf','Lectura.pdf')}{action('file-practica','Mi práctica.docx')}{action('file-excel','Presupuesto.xlsx')}</div> : <div className="template-list"><button disabled={correct} className={targetClass('blank')} onClick={() => choose('blank')}>{cue('blank')}<span className="template-symbol"><PracticeIcon name="blank"/></span><strong>Documento en blanco</strong><small>Una página para empezar de cero</small></button><button disabled={correct} className={targetClass('template')} onClick={() => choose('template')}>{cue('template')}<span className="template-symbol"><PracticeIcon name="template"/></span><strong>Carta sencilla</strong><small>Plantilla con estructura inicial</small></button></div>}{correct && <div className="opened-document" role="status">{step === 0 ? 'Documento1 · Página en blanco creada' : step === 1 ? 'Carta sencilla · Plantilla lista para personalizar' : step === 2 ? 'Buscador de archivos abierto' : 'Mi práctica.docx · Documento recuperado'}</div>}</div></div>}
         {lesson.id === 'word-interface' && <div className="word-window">
           {action('title','Mi práctica.docx — Word', 'word-title')}
