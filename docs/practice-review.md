@@ -1,5 +1,12 @@
 # Revisión didáctica: estudiantes sin experiencia
 
+## Rediseño de interfaz — doble revisión previa
+
+1. Jerarquía: navegación azul tinta, acción principal azul, estadísticas compactas y simulación diferenciada. Eliminar competencia visual entre bloques; conservar Windows como superficie funcional, sin ilustraciones decorativas.
+2. Continuidad didáctica: conservar textos, ayudas paso a paso, acceso a cuenta, resultados y guardado. Agrupar instrucciones generales en apartados explícitos, sin ocultar los pasos de la práctica guiada. En pantallas amplias, mostrar guía junto al simulador; en pantallas pequeñas, antes. Mantener nombres y funciones de controles, notas solo en lectura y reglas de evaluación.
+
+Verificación prevista: compilación, tipos, pruebas existentes y comprobaciones estructurales. No sustituye una prueba visual o de usabilidad con estudiantes.
+
 ## Notas «¿Sabías que…?» — revisión previa
 
 1. Exactitud: contrastados documentos recientes y plantillas con «Tareas básicas en Word»; contador con «Mostrar recuento de palabras»; zoom con «Acercar o alejar un documento», todos de Microsoft. Fuentes junto a cada nota. No se incorpora el supuesto límite de 1,000 páginas.
