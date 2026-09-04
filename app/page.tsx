@@ -4,6 +4,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import AccountAccess from '@/components/account-access';
 import WordLab from '@/components/word-lab';
+import DocumentLab from '@/components/document-lab';
 import { lessons, nextLessons, summarize, type PracticeAttempt } from '@/lib/word-lessons';
 
 export default function Home() {
@@ -67,6 +68,7 @@ export default function Home() {
       {authLoading && <p role="status" className="notice-strip">Comprobando tu sesión…</p>}
       {!session && !authLoading && <p className="notice-strip">Puedes explorar la primera práctica guiada. <a href="#acceso">Inicia sesión</a> para evaluar, guardar y continuar tu ruta.</p>}
       {loading && <p role="status" className="notice-strip">Recuperando tus resultados…</p>}
+      <div className="document-entry"><div><strong>Ahora practica creando un documento</strong><p>Escribe tu presentación, dale formato y comprueba el resultado. Si es tu primera vez, comienza por las lecciones de abajo.</p></div><a className="solid-button" href="#documento-practico">Ir al documento editable →</a></div>
       {error && <div role="alert" className="notice-strip warning">{error} <button className="text-button" onClick={() => setRefresh(value => value + 1)}>Reintentar</button></div>}
       <div className="course-grid"><aside className="lesson-sidebar" aria-label="Lecciones"><div className="sidebar-module"><img src="/1-2627/desktop/word.svg" alt=""/><span>Bloque 01</span><strong>Primeros pasos</strong></div><p className="lesson-kicker">TU RUTA, PASO A PASO</p><ol>{lessons.map((lesson, index) => {
         const locked = index > 0 && (stats.best[lessons[index - 1].id] ?? -1) < 70;
@@ -75,6 +77,7 @@ export default function Home() {
       <WordLab key={`${userId ?? 'guest'}-${selected}`} lesson={lessons[selected]} userId={!loading && !error ? userId : undefined} onSaved={saved}/></div>
       <section className="learning-history" id="resultados"><div className="section-title"><div><p className="lesson-kicker">APRENDER TAMBIÉN ES INTENTAR</p><h2>Mi historial de práctica</h2></div><span>Últimos 10 intentos</span></div>{attempts.length ? <div className="history-table"><table><thead><tr><th>Lección</th><th>Resultado</th><th>Fecha</th></tr></thead><tbody>{attempts.slice(0,10).map(attempt => <tr key={attempt.id}><td>{lessons.find(lesson => lesson.id === attempt.lesson_id)?.title ?? attempt.lesson_id}</td><td><span className={attempt.score >= 70 ? 'score-chip passed' : 'score-chip'}>{attempt.score}/100</span></td><td>{new Date(attempt.created_at).toLocaleString('es-MX', { dateStyle:'medium', timeStyle:'short' })}</td></tr>)}</tbody></table></div> : <p className="empty-history">{session ? 'Cuando guardes tu primer reto aparecerá aquí. Las lecturas y las prácticas guiadas no suman puntos.' : 'Tu historial estará disponible al iniciar sesión.'}</p>}</section>
       <section className="next-route" id="ruta"><p className="lesson-kicker">LO QUE SIGUE EN TU APRENDIZAJE</p><h2>De tus primeras palabras a un documento completo</h2><p>Estas lecciones se incorporarán después. Tu avance actual corresponde únicamente a las tres lecciones del bloque inicial.</p><ol>{nextLessons.map((title,index) => <li key={title}><span>{String(index+4).padStart(2,'0')}</span><strong>{title}</strong><small>En preparación</small></li>)}</ol><details><summary>Ver la ruta completa del módulo EDOA</summary><ul><li>Procesador de texto · 44 horas</li><li>Presentaciones electrónicas · 25 horas</li><li>Hoja de cálculo · 55 horas</li><li>Internet y comunicación · 20 horas</li></ul><p>Las prácticas son preparación para las evidencias. Sus porcentajes no se suman automáticamente a una calificación oficial.</p></details></section>
+      <DocumentLab key={`document-${userId ?? 'guest'}`} userId={authLoading ? undefined : userId}/>
       <AccountAccess session={session}/>
       <section className="mentor-note"><h2>Tu aprendizaje tiene acompañamiento.</h2><p>Si una actividad se te dificulta, revisa la explicación y vuelve a practicar. También puedes acercarte al Profe Santiago durante la clase o asesoría del grupo 311.</p></section>
       <footer className="studio-footer"><strong>Aula del Profe Santiago</strong><span>EDOA · Material didáctico personal · 2026–2027</span><small>Simulación educativa independiente. Word es una marca de Microsoft; no existe afiliación con Microsoft.</small></footer>

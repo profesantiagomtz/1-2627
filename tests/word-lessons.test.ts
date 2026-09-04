@@ -4,6 +4,51 @@ import { lessons, scoreResponses, summarize } from '../lib/word-lessons.ts';
 import { practiceGuidance } from '../lib/practice-guidance.ts';
 import { beginnerSteps, lessonPreparation } from '../lib/beginner-guidance.ts';
 import { factsForLesson, wordFacts } from '../lib/word-facts.ts';
+import { blankDocument, documentScore, evaluateDocument, formatSelection, paragraphText, type PracticeDocument } from '../lib/document-practice.ts';
+
+const completedDocument = (): PracticeDocument => [
+  { runs: [{ text: 'Mi perfil de estudiante', bold: true }], align: 'center' },
+  { runs: [{ text: 'Nombre: Ana López', bold: false }], align: 'left' },
+  { runs: [{ text: 'Grupo: 311', bold: false }], align: 'left' },
+];
+test('documento vacío no da puntos, ni siquiera por formato vacío', () => {
+  assert.equal(documentScore(blankDocument()), 0);
+});
+test('documento completo: cinco criterios y 100 puntos', () => {
+  assert.equal(documentScore(completedDocument()), 100);
+  assert.equal(evaluateDocument(completedDocument()).filter(c => c.passed).length, 5);
+});
+test('cada criterio descuenta únicamente su peso', () => {
+  const doc = completedDocument(); doc[0].align = 'left'; assert.equal(documentScore(doc), 85);
+  doc[0].runs[0].bold = false; assert.equal(documentScore(doc), 70);
+  doc[2].runs[0].text = 'Grupo: 312'; assert.equal(documentScore(doc), 50);
+  doc[1].runs[0].text = 'Nombre:'; assert.equal(documentScore(doc), 25);
+});
+test('se evalúa todo el título, no solo una palabra en negrita', () => {
+  const doc = completedDocument(); doc[0].runs = [{text:'Mi perfil ',bold:true},{text:'de estudiante',bold:false}];
+  assert.equal(documentScore(doc),85);
+});
+test('título incorrecto no gana puntos por estar centrado o en negrita', () => {
+  const doc = completedDocument(); doc[0].runs[0].text = 'Otro título'; assert.equal(documentScore(doc),45);
+});
+test('práctica y reto tienen títulos diferentes; espacios y mayúsculas no penalizan', () => {
+  const doc = completedDocument(); doc[0].runs[0].text = ' MI  PERFIL DE ESTUDIANTE ';
+  assert.equal(documentScore(doc),100); assert.equal(documentScore(doc,true),45);
+  doc[0].runs[0].text = 'Mi presentación'; assert.equal(documentScore(doc,true),100);
+});
+test('formato afecta solo la selección y se puede quitar sin alterar el texto', () => {
+  const p = {runs:[{text:'Hola mundo',bold:false}],align:'left' as const};
+  const formatted = formatSelection(p,0,4);
+  assert.deepEqual(formatted.runs,[{text:'Hola',bold:true},{text:' mundo',bold:false}]);
+  assert.deepEqual(formatSelection(formatted,0,4),p);
+  assert.equal(paragraphText(formatted),'Hola mundo');
+  assert.deepEqual(formatSelection(p,0,0),p);
+});
+test('cualquier orden de edición produce la misma nota final', () => {
+  const first = completedDocument(); first[0].runs[0].bold = false;
+  first[0] = formatSelection(first[0],0,paragraphText(first[0]).length);
+  assert.equal(documentScore(first),documentScore(completedDocument()));
+});
 
 test('las notas tienen ejemplos, fuentes oficiales y correspondencia con las lecciones', () => {
   assert.equal(new Set(wordFacts.map(fact => fact.id)).size, wordFacts.length);

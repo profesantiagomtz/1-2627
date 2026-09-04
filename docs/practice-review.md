@@ -1,5 +1,12 @@
 # Revisión didáctica: estudiantes sin experiencia
 
+## Documento editable — doble revisión previa
+
+1. Comprensión: separar entrenamiento y entrega; explicar selección, escritura, corrección y alineación. Tres párrafos delimitados (título, nombre, grupo) para una primera práctica acotada. La guía debe indicar que Enter pasa al siguiente párrafo y que las etiquetas no forman parte del documento. Reto con título distinto, criterios y pesos visibles, sin señales de respuesta. No puntuar rapidez ni orden de clics.
+2. Correspondencia: escribir modifica el documento; negrita afecta exclusivamente el texto seleccionado; centrar afecta el párrafo activo. Permitir ratón, teclado y selección asistida para pantalla táctil. Evaluar el estado final con los mismos criterios en cliente y servidor; no sumar estos resultados al bloque previo ni cambiar notas históricas. Guardar por usuario con identificador idempotente. No confundir revisión en pantalla con guardado confirmado. No prometer edición completa de Word ni archivos .docx.
+
+Verificación posterior: 21 pruebas de lógica aprobadas y compilación/tipos correctos. Pruebas transaccionales en Supabase aprobadas para notas 0/45/70/85/100, negrita parcial, forma/tamaño del documento, autorización, idempotencia, colisiones entre usuarios y lectura aislada. Datos ficticios revertidos. Los espacios especiales del editor se normalizan antes de enviar el documento. Esta entrega no incluye prueba de interacción o revisión visual en navegador; queda pendiente validación de usabilidad con el docente. El editor comienza abierto y con tres párrafos delimitados; las rutas para abrir Word siguen en las lecciones de orientación. La práctica guiada no se guarda, el reto sí guarda documento y resultado; no se genera un .docx.
+
 ## Rediseño de interfaz — doble revisión previa
 
 1. Jerarquía: navegación azul tinta, acción principal azul, estadísticas compactas y simulación diferenciada. Eliminar competencia visual entre bloques; conservar Windows como superficie funcional, sin ilustraciones decorativas.
