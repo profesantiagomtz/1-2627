@@ -1,5 +1,10 @@
 # Revisión didáctica: estudiantes sin experiencia
 
+## Ejercicio 1 con archivo real — doble revisión previa
+
+1. Comprensión: tres acciones visibles — descargar, resolver y entregar. Una sola oración por acción. El alumno escribe los números dentro de los círculos, guarda en Word y selecciona el archivo guardado. Mensajes cortos para formato incorrecto, tamaño excesivo y archivo equivocado.
+2. Correspondencia: se conserva una copia del original del docente. El revisor identifica cada círculo por el nombre interno de su forma, no por el orden de aparición ni por encontrar los números 1 a 10 en cualquier sitio. Cada acierto vale 10 puntos. El archivo y la nota se guardan solo al pulsar Guardar entrega y requieren sesión. El bucket es privado; cada alumno solo puede leer su carpeta. La función del servidor recalcula la nota y exige que el archivo exista antes de registrar el intento.
+
 ## Documento editable — doble revisión previa
 
 1. Comprensión: separar entrenamiento y entrega; explicar selección, escritura, corrección y alineación. Tres párrafos delimitados (título, nombre, grupo) para una primera práctica acotada. La guía debe indicar que Enter pasa al siguiente párrafo y que las etiquetas no forman parte del documento. Reto con título distinto, criterios y pesos visibles, sin señales de respuesta. No puntuar rapidez ni orden de clics.

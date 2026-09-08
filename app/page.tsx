@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import AccountAccess from '@/components/account-access';
 import WordLab from '@/components/word-lab';
 import DocumentLab from '@/components/document-lab';
+import FileExerciseOne from '@/components/file-exercise-one';
 import { lessons, nextLessons, summarize, type PracticeAttempt } from '@/lib/word-lessons';
 
 export default function Home() {
@@ -68,6 +69,7 @@ export default function Home() {
       {authLoading && <p role="status" className="notice-strip">Comprobando tu sesión…</p>}
       {!session && !authLoading && <p className="notice-strip">Puedes explorar la primera práctica guiada. <a href="#acceso">Inicia sesión</a> para evaluar, guardar y continuar tu ruta.</p>}
       {loading && <p role="status" className="notice-strip">Recuperando tus resultados…</p>}
+      <FileExerciseOne key={`file-exercise-${userId ?? 'guest'}`} userId={authLoading ? undefined : userId}/>
       <div className="document-entry"><div><strong>Ahora practica creando un documento</strong><p>Escribe tu presentación, dale formato y comprueba el resultado. Si es tu primera vez, comienza por las lecciones de abajo.</p></div><a className="solid-button" href="#documento-practico">Ir al documento editable →</a></div>
       {error && <div role="alert" className="notice-strip warning">{error} <button className="text-button" onClick={() => setRefresh(value => value + 1)}>Reintentar</button></div>}
       <div className="course-grid"><aside className="lesson-sidebar" aria-label="Lecciones"><div className="sidebar-module"><img src="/1-2627/desktop/word.svg" alt=""/><span>Bloque 01</span><strong>Primeros pasos</strong></div><p className="lesson-kicker">TU RUTA, PASO A PASO</p><ol>{lessons.map((lesson, index) => {

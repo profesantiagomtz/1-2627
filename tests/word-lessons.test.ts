@@ -1,10 +1,32 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { lessons, scoreResponses, summarize } from '../lib/word-lessons.ts';
 import { practiceGuidance } from '../lib/practice-guidance.ts';
 import { beginnerSteps, lessonPreparation } from '../lib/beginner-guidance.ts';
 import { factsForLesson, wordFacts } from '../lib/word-facts.ts';
 import { blankDocument, documentScore, evaluateDocument, formatSelection, paragraphText, type PracticeDocument } from '../lib/document-practice.ts';
+import { extractExerciseOneAnswers, gradeExerciseOne, readExerciseOne } from '../lib/exercise-one.ts';
+
+test('la copia descargable es el Ejercicio 1 original y comienza sin respuestas', () => {
+  const bytes=readFileSync(new URL('../public/ejercicio-1-identificacion-word.docx',import.meta.url));
+  assert.equal(gradeExerciseOne(readExerciseOne(bytes)).score,0);
+});
+
+test('ejercicio 1 reconoce cada círculo por su identidad y no por el orden del archivo', () => {
+  const anchors = [
+    ['Elipse 14','10'],['Elipse 44','1'],['Elipse 42','9'],['Elipse 16','2'],['Elipse 39','3'],
+    ['Elipse 13','4'],['Elipse 43','5'],['Elipse 15','6'],['Elipse 40','7'],['Elipse 41','8'],
+  ].map(([name,value]) => `<wp:anchor><wp:docPr name="${name}"/><wps:txbx><w:t>${value}</w:t></wps:txbx></wp:anchor>`).join('');
+  assert.equal(gradeExerciseOne(extractExerciseOneAnswers(anchors)).score,100);
+});
+test('ejercicio 1 resta 10 puntos por respuesta incorrecta o vacía', () => {
+  const anchors = [['Elipse 44','1'],['Elipse 16','2'],['Elipse 39','3'],['Elipse 13','4'],['Elipse 43','5'],['Elipse 15','6'],['Elipse 40','7'],['Elipse 41','8'],['Elipse 42',''],['Elipse 14','9']].map(([name,value]) => `<wp:anchor><wp:docPr name="${name}"/><w:t>${value}</w:t></wp:anchor>`).join('');
+  const result=gradeExerciseOne(extractExerciseOneAnswers(anchors)); assert.equal(result.score,80); assert.equal(result.items.filter(item=>!item.passed).length,2);
+});
+test('ejercicio 1 rechaza otro documento aunque contenga números', () => {
+  assert.throws(()=>extractExerciseOneAnswers('<wp:anchor><wp:docPr name="Otra forma"/><w:t>1</w:t></wp:anchor>'),/no corresponde/);
+});
 
 const completedDocument = (): PracticeDocument => [
   { runs: [{ text: 'Mi perfil de estudiante', bold: true }], align: 'center' },
