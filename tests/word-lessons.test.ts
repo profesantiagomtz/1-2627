@@ -7,6 +7,19 @@ import { beginnerSteps, lessonPreparation } from '../lib/beginner-guidance.ts';
 import { factsForLesson, wordFacts } from '../lib/word-facts.ts';
 import { blankDocument, documentScore, evaluateDocument, formatSelection, paragraphText, type PracticeDocument } from '../lib/document-practice.ts';
 import { extractExerciseOneAnswers, gradeExerciseOne, readExerciseOne } from '../lib/exercise-one.ts';
+import { coursesFor, firstName } from '../lib/course-catalog.ts';
+
+test('cada grupo recibe únicamente los módulos asignados', () => {
+  assert.deepEqual(coursesFor('111').map(course => course.code), ['PEAR-00']);
+  assert.deepEqual(coursesFor('310').map(course => course.code), ['MSII-21', 'ASIN-21']);
+  assert.deepEqual(coursesFor('311').map(course => course.code), ['EDOA-21']);
+  assert.deepEqual(coursesFor('511').map(course => course.code), ['MTCS-20']);
+  assert.deepEqual(coursesFor('999'), []);
+});
+
+test('la bienvenida usa solo el primer nombre del alumno', () => {
+  assert.equal(firstName('  Ana María López  '), 'Ana');
+});
 
 test('la copia descargable es el Ejercicio 1 original y comienza sin respuestas', () => {
   const bytes=readFileSync(new URL('../public/ejercicio-1-identificacion-word.docx',import.meta.url));

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { groups, type GroupCode } from '@/lib/course-catalog';
 
 type Mode = 'login' | 'register' | 'recover' | 'password';
 const redirectTo = 'https://profesantiagomtz.github.io/1-2627/';
@@ -10,6 +11,8 @@ export default function AccountAccess({ session }: { session: Session | null }) 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [groupCode, setGroupCode] = useState<GroupCode | ''>('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -47,6 +50,11 @@ export default function AccountAccess({ session }: { session: Session | null }) 
       setMessage('Usa al menos 8 caracteres y repite la misma contraseña.');
       return;
     }
+    const cleanName = fullName.trim().replace(/\s+/g, ' ');
+    if (mode === 'register' && (cleanName.length < 3 || !groupCode)) {
+      setMessage('Escribe tu nombre y selecciona tu grupo.');
+      return;
+    }
     setBusy(true);
     setMessage('');
     try {
@@ -55,7 +63,7 @@ export default function AccountAccess({ session }: { session: Session | null }) 
         if (error) throw error;
         setPassword('');
       } else if (mode === 'register') {
-        const { error } = await supabase.auth.signUp({ email: address, password, options: { emailRedirectTo: redirectTo } });
+        const { error } = await supabase.auth.signUp({ email: address, password, options: { emailRedirectTo: redirectTo, data: { full_name: cleanName, group_code: groupCode } } });
         if (error) throw error;
         setPassword('');
         setConfirmation('');
@@ -86,6 +94,7 @@ export default function AccountAccess({ session }: { session: Session | null }) 
     <div><p className="eyebrow light">TU ESPACIO DE APRENDIZAJE</p><h2>{mode === 'login' ? 'Inicia sesión' : mode === 'register' ? 'Crea tu cuenta' : mode === 'recover' ? 'Recupera tu acceso' : 'Establece tu contraseña'}</h2><p>{mode === 'register' ? 'Escribe tu correo y crea una contraseña. Entrarás de inmediato.' : mode === 'recover' ? 'Recibe un enlace para crear una contraseña nueva.' : 'Utiliza tu correo autorizado y una contraseña personal. No la compartas.'}</p></div>
     <form className="password-form" onSubmit={submit}>
       <fieldset disabled={busy}>
+        {mode === 'register' && <><label htmlFor="account-name">Nombre completo</label><input id="account-name" autoComplete="name" required maxLength={80} value={fullName} onChange={e => setFullName(e.target.value)} /><label htmlFor="account-group">Grupo</label><select id="account-group" required value={groupCode} onChange={e => setGroupCode(e.target.value as GroupCode | '')}><option value="">Selecciona tu grupo</option>{groups.map(group => <option key={group} value={group}>{group}</option>)}</select></>}
         {mode !== 'password' && <><label htmlFor="account-email">Correo electrónico</label><input id="account-email" type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} /></>}
         {mode !== 'recover' && <><label htmlFor="account-password">{mode === 'login' ? 'Contraseña' : 'Nueva contraseña (mínimo 8 caracteres)'}</label><input id="account-password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required minLength={mode === 'login' ? 1 : 8} value={password} onChange={e => setPassword(e.target.value)} /></>}
         {(mode === 'register' || mode === 'password') && <><label htmlFor="account-confirm">Repite la contraseña</label><input id="account-confirm" type="password" autoComplete="new-password" required minLength={8} value={confirmation} onChange={e => setConfirmation(e.target.value)} /></>}
