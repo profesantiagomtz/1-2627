@@ -41,24 +41,24 @@ export default function Home() {
 
   return <main className="focused-app">
     <header className="focused-header">
-      <a className="focused-brand" href="#contenido" aria-label="Ir al inicio"><span aria-hidden="true">PS</span><strong>Aula Virtual del Profe. Santiago Martínez</strong></a>
+      <a className="focused-brand" href="#contenido" aria-label="Ir al inicio"><span aria-hidden="true">SM</span><span className="brand-copy"><strong>Aula Virtual</strong><small>Profe. Santiago Martínez</small></span></a>
       {session && <button type="button" onClick={signOut}>Cerrar sesión</button>}
     </header>
 
     <div className="focused-main" id="contenido">
       {authLoading ? <section className="focused-status" role="status"><span className="focused-spinner" aria-hidden="true"/><p>Preparando tu aula…</p></section> : session && !profileComplete ? <ProfileSetup/> : session ? <>
         <section className="student-welcome">
-          <div><p>GRUPO {groupCode}</p><h1>¡Hola, {firstName(fullName)}! 👋</h1><span>Tu aula está lista. Hoy es un buen día para aprender algo nuevo.</span></div>
+          <div><p>GRUPO {groupCode} · TU ESPACIO</p><h1>¡Qué gusto verte, {firstName(fullName)}!</h1><span>Todo está preparado. Elige tu módulo y continúa avanzando.</span></div>
           <div className="student-avatar" aria-hidden="true">{fullName.trim().charAt(0).toUpperCase()}</div>
         </section>
         {error && <p className="focused-error" role="alert">{error}</p>}
         <section className="module-section" aria-labelledby="module-heading">
           <div className="module-heading"><div><p>TUS MÓDULOS</p><h2 id="module-heading">Continúa aprendiendo</h2></div><span>{assignedCourses.length} {assignedCourses.length === 1 ? 'módulo' : 'módulos'}</span></div>
           <div className="module-grid">{assignedCourses.map((course, index) => <article className={`module-card ${course.available ? 'available' : ''}`} key={course.code}>
-            <div className="module-icon" aria-hidden="true">{index + 1}</div><div><span>{course.code}</span><h3>{course.title}</h3><p>{course.available ? 'Tu primera actividad está disponible.' : 'El contenido aparecerá próximamente.'}</p></div><strong>{course.available ? 'Disponible' : 'Próximamente'}</strong>
+            <div className="module-icon" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div><div><span>{course.code}</span><h3>{course.title}</h3><p>{course.available ? 'Tu primera actividad está lista.' : 'Aquí encontrarás tus próximas actividades.'}</p></div>{course.available ? <a href="#actividad-edoa">Abrir módulo <span aria-hidden="true">→</span></a> : <strong>Próximamente</strong>}
           </article>)}</div>
         </section>
-        {assignedCourses.some(course => course.code === 'EDOA-21') && <section className="activity-section"><div className="focused-intro"><p>EDOA · ACTIVIDAD DISPONIBLE</p><h2>Empieza con el Ejercicio 1</h2><span>Descarga el archivo, resuélvelo en Word y entrégalo aquí.</span></div><FileExerciseOne key={session.user.id} userId={session.user.id}/></section>}
+        {assignedCourses.some(course => course.code === 'EDOA-21') && <section className="activity-section" id="actividad-edoa"><div className="activity-heading"><span>01</span><div><p>EDOA · ACTIVIDAD DISPONIBLE</p><h2>Identificación de elementos de Word</h2><small>Descarga, resuelve y entrega. Paso a paso.</small></div></div><FileExerciseOne key={session.user.id} userId={session.user.id}/></section>}
       </> : <>
         <section className="focused-intro focused-welcome"><p>TU AULA, TUS MÓDULOS</p><h1>Bienvenido a tu aula virtual</h1><span>Entra para ver las actividades de tu grupo.</span></section>
         {error && <p className="focused-error" role="alert">{error}</p>}
