@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import AccountAccess from '@/components/account-access';
 import FileExerciseOne from '@/components/file-exercise-one';
 import ProfileSetup from '@/components/profile-setup';
+import TeacherDashboard from '@/components/teacher-dashboard';
 import { coursesFor, firstName } from '@/lib/course-catalog';
 
 export default function Home() {
@@ -38,6 +39,7 @@ export default function Home() {
   const groupCode = String(session?.user.user_metadata.group_code ?? '');
   const assignedCourses = coursesFor(groupCode);
   const profileComplete = Boolean(fullName && assignedCourses.length);
+  const isTeacher = session?.user.email?.toLowerCase() === 'santiago.gonzalez@tam.conalep.edu.mx';
 
   return <main className="focused-app">
     <header className="focused-header">
@@ -46,7 +48,7 @@ export default function Home() {
     </header>
 
     <div className="focused-main" id="contenido">
-      {authLoading ? <section className="focused-status" role="status"><span className="focused-spinner" aria-hidden="true"/><p>Preparando tu aula…</p></section> : session && !profileComplete ? <ProfileSetup/> : session ? <>
+      {authLoading ? <section className="focused-status" role="status"><span className="focused-spinner" aria-hidden="true"/><p>Preparando tu aula…</p></section> : isTeacher ? <TeacherDashboard/> : session && !profileComplete ? <ProfileSetup/> : session ? <>
         <section className="student-welcome">
           <div><p>GRUPO {groupCode} · TU ESPACIO</p><h1>¡Qué gusto verte, {firstName(fullName)}!</h1><span>Todo está preparado. Elige tu módulo y continúa avanzando.</span></div>
           <div className="student-avatar" aria-hidden="true">{fullName.trim().charAt(0).toUpperCase()}</div>
