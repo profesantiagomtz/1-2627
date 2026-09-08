@@ -1,0 +1,35 @@
+.focused-app{min-height:100vh;background:#f4f7fb;color:#17233a;font-size:1rem}
+.focused-header{min-height:68px;background:#101c35;color:#fff;border-bottom:1px solid #273756;padding:12px max(20px,calc((100vw - 980px)/2));display:flex;align-items:center;justify-content:space-between;gap:20px}
+.focused-brand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none}
+.focused-brand>span{display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:#305be8;border:1px solid #6687ff;font-weight:800;letter-spacing:-1px}
+.focused-brand strong{font-size:1rem;letter-spacing:-.01em}
+.focused-header button{min-height:42px;padding:8px 14px;border:1px solid #52617c;border-radius:8px;background:#ffffff0b;color:#fff;font:inherit;font-size:.9rem;font-weight:650;cursor:pointer}
+.focused-header button:hover{background:#ffffff17}
+.focused-header button:focus-visible,.focused-brand:focus-visible{outline:3px solid #f4b648;outline-offset:3px}
+.focused-main{width:min(980px,calc(100% - 32px));margin:0 auto;padding:48px 0 24px}
+.focused-intro{margin-bottom:24px}
+.focused-intro>p{margin:0 0 8px;color:#305be8;font-size:.8rem;font-weight:800;letter-spacing:.09em}
+.focused-intro h1{margin:0 0 8px;font-family:inherit;font-size:clamp(1.8rem,4vw,2.65rem);line-height:1.12;letter-spacing:-.035em;color:#152542}
+.focused-intro>span{display:block;color:#53647e;font-size:1rem;line-height:1.55}
+.focused-welcome{max-width:600px;margin:12px auto 22px;text-align:center}
+.focused-status{min-height:55vh;display:grid;place-content:center;justify-items:center;color:#53647e}
+.focused-spinner{width:34px;height:34px;border:3px solid #d5ddeb;border-top-color:#305be8;border-radius:50%;animation:focused-spin .8s linear infinite}
+.focused-status p{font-size:1rem}
+.focused-error{margin:0 0 18px;padding:13px 16px;border-left:4px solid #b93d29;background:#fff0eb;color:#762517;border-radius:4px;font-size:1rem}
+.focused-app .file-exercise{margin:0;padding:clamp(20px,4vw,32px);box-shadow:0 14px 40px #142a5310}
+.focused-app .lesson-kicker{margin:0;color:#305be8;font-size:.8rem;font-weight:800;letter-spacing:.08em}
+.focused-app .course-badge{display:inline-block;padding:8px 10px;border-radius:6px;background:#eef3ff;color:#3157bf;font-size:.76rem;font-weight:800}
+.focused-app .solid-button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border:0;border-radius:7px;background:#305be8;color:#fff;font-weight:700;text-decoration:none;cursor:pointer}
+.focused-app .solid-button:hover{background:#244bc7}
+.focused-app .solid-button:focus-visible{outline:3px solid #efac39;outline-offset:3px}
+.focused-app .access-card{width:min(760px,100%);max-width:760px;margin:0 auto;padding:clamp(22px,4vw,32px);border:1px solid #253b5d;border-radius:14px;background:#142441;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);font-size:1rem}
+.focused-app .access-card h2{font-family:inherit;font-size:1.65rem;color:#fff;letter-spacing:-.025em}
+.focused-app .access-card p:not(.eyebrow){color:#c4d2ea;font-size:.95rem;line-height:1.6}
+.focused-app .access-card .eyebrow{color:#9fb6ee;font-size:.76rem}
+.focused-app .access-card input{border-radius:7px;padding:11px 12px}
+.focused-app .access-card form button{border-radius:7px;background:#f1b94b;font-size:.9rem}
+.focused-app .access-card form .account-options button{background:transparent;color:#c8d8fb;font-weight:500}
+.focused-footer{margin-top:36px;padding:22px 0 8px;border-top:1px solid #dce3ed;color:#718097;text-align:center;font-size:.82rem}
+@keyframes focused-spin{to{transform:rotate(360deg)}}
+@media(max-width:720px){.focused-main{width:min(100% - 24px,980px);padding-top:30px}.focused-header{padding:11px 14px}.focused-brand strong{font-size:.9rem}.focused-app .access-card{display:block}.focused-app .access-card>div{margin-bottom:20px}.focused-welcome{margin-top:4px}.focused-footer{margin-top:28px}}
+@media(prefers-reduced-motion:reduce){.focused-spinner{animation:none}}

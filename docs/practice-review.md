@@ -1,5 +1,12 @@
 # Revisión didáctica: estudiantes sin experiencia
 
+## Simplificación de la plataforma — doble revisión previa
+
+1. Comprensión: la experiencia muestra una sola decisión a la vez. Sin sesión, únicamente acceso. Con sesión, únicamente el Ejercicio 1 y sus tres acciones: descargar, resolver y entregar. Se eliminan navegación, estadísticas, simuladores, rutas futuras, promociones y explicaciones que compitan con la tarea.
+2. Continuidad: permanecen registro, inicio, recuperación de contraseña, cierre de sesión, descarga, revisión automática, guardado e historial del Ejercicio 1. Las actividades anteriores se ocultan de la interfaz, pero su código y sus datos no se eliminan.
+
+Verificación prevista: tipos, pruebas y compilación de producción. No se realizará una prueba visual en navegador salvo solicitud expresa del docente.
+
 ## Ejercicio 1 con archivo real — doble revisión previa
 
 1. Comprensión: tres acciones visibles — descargar, resolver y entregar. Una sola oración por acción. El alumno escribe los números dentro de los círculos, guarda en Word y selecciona el archivo guardado. Mensajes cortos para formato incorrecto, tamaño excesivo y archivo equivocado.
