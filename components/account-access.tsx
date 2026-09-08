@@ -59,7 +59,7 @@ export default function AccountAccess({ session }: { session: Session | null }) 
         if (error) throw error;
         setPassword('');
         setConfirmation('');
-        setMessage('Revisa tu correo para confirmar el registro. Si ya tienes cuenta, utiliza Iniciar sesión o Recuperar contraseña.');
+        setMessage('Cuenta creada. Ya puedes comenzar.');
       } else if (mode === 'recover') {
         const { error } = await supabase.auth.resetPasswordForEmail(address, { redirectTo });
         if (error) throw error;
@@ -83,7 +83,7 @@ export default function AccountAccess({ session }: { session: Session | null }) 
   if (session && mode !== 'password') return <section className="access-card" id="acceso"><div><h2>Tu cuenta del aula</h2><p>Administra tu contraseña sin crear otra cuenta.</p></div><button className="profile" onClick={() => changeMode('password')}>Establecer o cambiar contraseña</button></section>;
 
   return <section className="access-card" id="acceso">
-    <div><p className="eyebrow light">TU ESPACIO DE APRENDIZAJE</p><h2>{mode === 'login' ? 'Inicia sesión' : mode === 'register' ? 'Crea tu cuenta' : mode === 'recover' ? 'Recupera tu acceso' : 'Establece tu contraseña'}</h2><p>{mode === 'register' ? 'Confirma tu correo una sola vez. Después entra con tu contraseña.' : mode === 'recover' ? 'También sirve si tu cuenta todavía no tiene contraseña.' : 'Utiliza tu correo autorizado y una contraseña personal. No la compartas.'}</p></div>
+    <div><p className="eyebrow light">TU ESPACIO DE APRENDIZAJE</p><h2>{mode === 'login' ? 'Inicia sesión' : mode === 'register' ? 'Crea tu cuenta' : mode === 'recover' ? 'Recupera tu acceso' : 'Establece tu contraseña'}</h2><p>{mode === 'register' ? 'Escribe tu correo y crea una contraseña. Entrarás de inmediato.' : mode === 'recover' ? 'Recibe un enlace para crear una contraseña nueva.' : 'Utiliza tu correo autorizado y una contraseña personal. No la compartas.'}</p></div>
     <form className="password-form" onSubmit={submit}>
       <fieldset disabled={busy}>
         {mode !== 'password' && <><label htmlFor="account-email">Correo electrónico</label><input id="account-email" type="email" autoComplete="username" required value={email} onChange={e => setEmail(e.target.value)} /></>}
